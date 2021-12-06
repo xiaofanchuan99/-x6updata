@@ -3,7 +3,7 @@ import { toLower, unescape } from 'lodash-es'
 import { Popover, Tag } from 'antd'
 import { DragSource, ConnectDragPreview, ConnectDragSource } from 'react-dnd'
 import { DatabaseFilled, ReadOutlined } from '@ant-design/icons'
-import dia from './dia.png'
+// import dia from './dia.png'
 // import marked from 'marked'
 import { useSafeSetHTML } from '@/pages/common/hooks/useSafeSetHtml'
 import { DRAGGABLE_ALGO_COMPONENT } from '@/constants/graph'
@@ -98,20 +98,22 @@ const InnerNodeTitle = (props: Props) => {
 
   console.log(node)
 
-
   if (node.name === '菱形') {
     return (
       <div
-        className={styles.diamondNodeTitleWrapper}
+        // className={styles.diamondNodeTitleWrapper}
         onMouseEnter={onMouseIn}
         onMouseLeave={onMouseOut}
       >
         {connectDragPreview(
           connectDragSource(
-            <div className={styles.node}>
-              {/*<DatabaseFilled className={styles.nodeIcon} />*/}
-              <img src={dia}/>
-              <span className={styles.label}>{name}</span>
+            <div className={styles.imgNode}>
+              {/* <DatabaseFilled className={styles.nodeIcon} /> */}
+              <img
+                src="https://img2.baidu.com/it/u=2234646588,205860350&fm=26&fmt=auto"
+                style={{ width: '50px', height: '80px', marginTop: '10px' }}
+              />
+              {/* <span className={styles.label}>{name}</span> */}
             </div>,
           ),
         )}
