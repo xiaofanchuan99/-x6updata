@@ -31,16 +31,11 @@ export const NodeElement: React.FC<Props> = (props) => {
   const data: any = node?.getData() || {}
   const { name, id, selected } = data
   const nodeStatus = instanceStatus[id] || {}
-  console.log(node, data)
-  const content = (
-    <div>
-      {data.gender}
-    </div>
-  );
+  // console.log(node, data)
+  const content = <div>{data.gender}</div>
 
   return (
     <Popover content={content} title="Title">
-
       <div
         className={classNames(styles.nodeElement, {
           [styles.selected]: !!selected,
@@ -68,11 +63,7 @@ export const DiamondNodeElement: React.FC<Props> = (props) => {
   const data: any = node?.getData() || {}
   const { name, gender } = data
 
-  const content = (
-    <div>
-      {gender}
-    </div>
-  );
+  const content = <div>{gender}</div>
 
   return (
     <Popover content={content} title="Title">

@@ -14,14 +14,17 @@ import {
   BaseNode,
   X6DemoGroupNode,
   X6DemoNode,
-  X6DemoNode1
+  X6DemoNode1,
 } from '../common/graph-common/shape/node'
 import {
   BaseEdge,
   GuideEdge,
   X6DemoGroupEdge,
 } from '../common/graph-common/shape/edge'
-import { DiamondNodeElement, NodeElement } from '../dag-canvas/elements/node-element'
+import {
+  DiamondNodeElement,
+  NodeElement,
+} from '../dag-canvas/elements/node-element'
 import { NodeGroup } from '../dag-canvas/elements/node-group'
 import { NExecutionStatus, NExperiment, NExperimentGraph } from './typing'
 import {
@@ -151,20 +154,20 @@ class ExperimentGraph extends GraphCore<BaseNode, BaseEdge> {
           return magnet.getAttribute('port-group') !== 'in'
         },
         // 显示可用的链接桩
-        validateConnection:({
-                             sourceView,
-                             targetView,
-                             sourceMagnet,
-                             targetMagnet,
-                             sourceCell,
-                             targetCell,
-                           })=> {
-
-
+        validateConnection: ({
+          sourceView,
+          targetView,
+          sourceMagnet,
+          targetMagnet,
+          sourceCell,
+          targetCell,
+        }) => {
           const oldGraph = this.experimentGraph$.getValue()
           const links = oldGraph.links
-          const hasConnected = links.find(link=> {
-            return link.source === sourceCell?.id && link.target === targetCell?.id
+          const hasConnected = links.find((link) => {
+            return (
+              link.source === sourceCell?.id && link.target === targetCell?.id
+            )
           })
 
           if (hasConnected) {
@@ -766,8 +769,25 @@ class ExperimentGraph extends GraphCore<BaseNode, BaseEdge> {
     this.undo()
   }
 
+  // 更新节点的额外数据
+  updateNodeExtraData = async (nodeInstanceId: string, extraData: any) => {
+    const renameRes = await { success: true }
+    if (renameRes.success) {
+      const cell = this.getCellById(nodeInstanceId)
+      const data: object = cell!.getData()
+      const newData = { ...data, extraData }
+      cell!.setData(newData)
+      this.updateExperimentGraph([newData as any])
+    }
+    return renameRes
+  }
+
   // 重命名节点
-  renameNode = async (nodeInstanceId: string, newName: string, gender: string) => {
+  renameNode = async (
+    nodeInstanceId: string,
+    newName: string,
+    gender: string,
+  ) => {
     const renameRes = await { success: true }
     if (renameRes.success) {
       const cell = this.getCellById(nodeInstanceId)

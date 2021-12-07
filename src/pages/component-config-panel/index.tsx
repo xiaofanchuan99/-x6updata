@@ -38,9 +38,39 @@ interface Props {
   className?: string
 }
 
+const defaultData = [
+  {
+    childrenForm: [
+      {
+        colName: '1',
+        speName: '2',
+      },
+      {
+        colName: '3',
+        speName: '4',
+      },
+    ],
+    viewName: '1',
+  },
+  {
+    childrenForm: [
+      {
+        colName: '5',
+        speName: '6',
+      },
+      {
+        colName: '7',
+        speName: '8',
+      },
+    ],
+    viewName: '2',
+  },
+]
+
 export const ComponentConfigPanel: React.FC<Props> = (props) => {
   const [isModalVisible, setIsModalVisible] = useState(false)
   const { experimentId, className } = props
+  console.log(experimentId)
   const expGraph = useExperimentGraph(experimentId)
   const [activeNodeInstance] = useObservableState(
     () => expGraph.activeNodeInstance$,
@@ -48,13 +78,17 @@ export const ComponentConfigPanel: React.FC<Props> = (props) => {
 
   const nodeId = activeNodeInstance && activeNodeInstance.id
 
+  const [node] = useObservableState(() => expGraph.activeNodeInstance$)
+
   const showModal = () => {
     setIsModalVisible(true)
   }
 
-  const handleOk = () => {
+  const handleOk = async () => {
     setIsModalVisible(false)
     const data = form.getFieldValue('sights')
+    // await expGraph.updateNodeExtraData(nodeId, data)
+
     console.log(data)
   }
 
@@ -62,106 +96,24 @@ export const ComponentConfigPanel: React.FC<Props> = (props) => {
     setIsModalVisible(false)
   }
 
-  const data = [
-    {
-      key: '1',
-      name: 'John Brown',
-      age: 32,
-      address: 'New York No. 1 Lake Park',
-      tags: ['nice', 'developer'],
-    },
-    {
-      key: '2',
-      name: 'Jim Green',
-      age: 42,
-      address: 'London No. 1 Lake Park',
-      tags: ['loser'],
-    },
-    {
-      key: '3',
-      name: 'Joe Black',
-      age: 32,
-      address: 'Sidney No. 1 Lake Park',
-      tags: ['cool', 'teacher'],
-    },
-  ]
-
-  const columns = [
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-      render: (text) => <a>{text}</a>,
-    },
-    {
-      title: 'Age',
-      dataIndex: 'age',
-      key: 'age',
-    },
-  ]
-
   const [form] = Form.useForm()
+
+  useEffect(() => {
+    console.log(node, props)
+  }, [node])
 
   const onFinish = (values) => {
     console.log('Received values of form:', values)
   }
 
   useEffect(() => {
-    form.setFieldsValue({
-      sights: [
-        {
-          sightsaaa: [
-            {
-              price123: '312',
-            },
-            {
-              price123: '312',
-            },
-          ],
-          price: '123',
-        },
-        {
-          sightsaaa: [
-            {
-              price123: '312',
-            },
-            {
-              price123: '31',
-            },
-          ],
-          price: '312',
-        },
-      ],
-    })
-  }, [form])
+    let data = node?.extraData || defaultData
+    form.setFieldsValue({ sights: data })
+  }, [form, node])
 
   const addRow = () => {
     const old = form.getFieldValue('sights')
-    const newData = [
-      ...old,
-      {
-        sightsaaa: [
-          {
-            price123: '312',
-          },
-          {
-            price123: '312',
-          },
-        ],
-        price: '123',
-      },
-      {
-        sightsaaa: [
-          {
-            price123: '312',
-          },
-          {
-            price123: '31',
-          },
-        ],
-        price: '312',
-      },
-    ]
+    const newData = [...old, ...defaultData]
     form.setFieldsValue({ sights: newData })
 
     console.log(old)
@@ -169,6 +121,10 @@ export const ComponentConfigPanel: React.FC<Props> = (props) => {
 
   const handleChange = () => {
     form.setFieldsValue({ sights: [] })
+  }
+
+  const handleClick = (evt) => {
+    evt.stopPropagation()
   }
 
   return (
@@ -199,7 +155,6 @@ export const ComponentConfigPanel: React.FC<Props> = (props) => {
             <Button type="primary" onClick={showModal}>
               submit
             </Button>
-            <Table columns={columns} dataSource={data} />
           </Tabs.TabPane>
         </Tabs>
       </div>
@@ -217,12 +172,6 @@ export const ComponentConfigPanel: React.FC<Props> = (props) => {
           onFinish={onFinish}
           autoComplete="off"
         >
-          {/*<Form.Item name="area" label="Area" rules={[{ required: true, message: 'Missing area' }]}>*/}
-          {/*  <Select options={areas} onChange={handleChange} />*/}
-          {/*</Form.Item>*/}
-          {/*<Form.Item name="area" label="Area" rules={[{ required: true, message: 'Missing area' }]}>*/}
-          {/*  <Select options={areas} onChange={handleChange} />*/}
-          {/*</Form.Item>*/}
           <Form.List name="sights">
             {(fields, { add, remove }) => (
               <>
@@ -233,119 +182,76 @@ export const ComponentConfigPanel: React.FC<Props> = (props) => {
                         <Form.Item
                           {...field}
                           label="视图名"
-                          name={[field.name, 'price']}
-                          fieldKey={[field.fieldKey, 'price']}
-                          rules={[{ required: true, message: 'Missing price' }]}
+                          name={[field.name, 'viewName']}
+                          fieldKey={[field.fieldKey, 'viewName']}
+                          rules={[
+                            { required: true, message: 'Missing viewName' },
+                          ]}
                         >
-                          <Input />
+                          <Input onClick={handleClick} />
                         </Form.Item>
                       }
                       key={field.key}
                     >
-                      <Space key={field.key} align="baseline">
-                        {/*<Form.Item*/}
-                        {/*  {...field}*/}
-                        {/*  label="Sight"*/}
-                        {/*  name={[field.name, 'sight']}*/}
-                        {/*  fieldKey={[field.fieldKey, 'sight']}*/}
-                        {/*  rules={[{ required: true, message: 'Missing sight' }]}*/}
-                        {/*>*/}
-                        {/*  <Select style={{ width: 130 }}>*/}
-                        {/*    {(sights.Tiananmen || []).map(item => (*/}
-                        {/*      <Option key={item} value={item}>*/}
-                        {/*        {item}*/}
-                        {/*      </Option>*/}
-                        {/*    ))}*/}
-                        {/*  </Select>*/}
-                        {/*</Form.Item>*/}
-                        {/*<Form.Item*/}
-                        {/*  {...field}*/}
-                        {/*  label="Price"*/}
-                        {/*  name={[field.name, 'price']}*/}
-                        {/*  fieldKey={[field.fieldKey, 'price']}*/}
-                        {/*  rules={[{ required: true, message: 'Missing price' }]}*/}
-                        {/*>*/}
-                        {/*  <Input />*/}
-                        {/*</Form.Item>*/}
-                        <Form.List
-                          name={[field.name, 'sightsaaa']}
-                          fieldKey={[field.fieldKey, 'sightsaaa']}
-                        >
-                          {(fieldsa, { add: add1, remove: remove1 }) => (
-                            <>
-                              {fieldsa.map((field) => (
-                                <div>
-                                  {/*<Form.Item*/}
-                                  {/*  {...field}*/}
-                                  {/*  label="Sight123"*/}
-                                  {/*  name={[field.name, 'sight']}*/}
-                                  {/*  fieldKey={[field.fieldKey, 'sight']}*/}
-                                  {/*  rules={[{ required: true, message: 'Missing sight' }]}*/}
-                                  {/*>*/}
-                                  {/*  <Select style={{ width: 130 }}>*/}
-                                  {/*    {(sights.Tiananmen || []).map(item => (*/}
-                                  {/*      <Option key={item} value={item}>*/}
-                                  {/*        {item}*/}
-                                  {/*      </Option>*/}
-                                  {/*    ))}*/}
-                                  {/*  </Select>*/}
-                                  {/*</Form.Item>*/}
-                                  <Space key={field.key} align="baseline">
-                                    <Form.Item
-                                      {...field}
-                                      label="列名称"
-                                      name={[field.name, 'price123']}
-                                      fieldKey={[field.fieldKey, 'price123']}
-                                      rules={[
-                                        {
-                                          required: true,
-                                          message: 'Missing price',
-                                        },
-                                      ]}
-                                    >
-                                      <Input />
-                                    </Form.Item>
-                                    <Form.Item
-                                      {...field}
-                                      label="特征名称"
-                                      name={[field.name, 'price123']}
-                                      fieldKey={[field.fieldKey, 'price123']}
-                                      rules={[
-                                        {
-                                          required: true,
-                                          message: 'Missing price',
-                                        },
-                                      ]}
-                                    >
-                                      <Input />
-                                    </Form.Item>
-                                    <MinusCircleOutlined
-                                      onClick={() => remove1(field.name)}
-                                    />
-                                  </Space>
-                                </div>
-                              ))}
-
-                              <Form.Item>
-                                <Button
-                                  type="dashed"
-                                  onClick={() => add1()}
-                                  block
-                                  icon={<PlusOutlined />}
+                      <Form.List name={[field.name, 'childrenForm']}>
+                        {(
+                          childrenFields,
+                          { add: childrenAdd, remove: childrenRemove },
+                        ) => (
+                          <>
+                            {childrenFields.map((field) => (
+                              <Space key={field.key} align="baseline">
+                                <Form.Item
+                                  {...field}
+                                  label="列名称"
+                                  name={[field.name, 'colName']}
+                                  fieldKey={[field.fieldKey, 'colName']}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: 'Missing price',
+                                    },
+                                  ]}
                                 >
-                                  添加一行数据
-                                </Button>
-                              </Form.Item>
-                            </>
-                          )}
-                        </Form.List>
+                                  <Input />
+                                </Form.Item>
+                                <Form.Item
+                                  {...field}
+                                  label="特征名称"
+                                  name={[field.name, 'speName']}
+                                  fieldKey={[field.fieldKey, 'speName']}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: 'Missing price',
+                                    },
+                                  ]}
+                                >
+                                  <Input />
+                                </Form.Item>
+                                <MinusCircleOutlined
+                                  onClick={() => childrenRemove(field.name)}
+                                />
+                              </Space>
+                            ))}
 
-                        {/*<MinusCircleOutlined onClick={() => remove(field.name)} />*/}
-                      </Space>
+                            <Form.Item>
+                              <Button
+                                type="dashed"
+                                onClick={() => childrenAdd()}
+                                block
+                                icon={<PlusOutlined />}
+                              >
+                                添加一行数据
+                              </Button>
+                            </Form.Item>
+                          </>
+                        )}
+                      </Form.List>
                     </Panel>
                   ))}
                 </Collapse>
-                <Form.Item>
+                <Form.Item className="mt-2">
                   <Button
                     type="dashed"
                     onClick={() => addRow()}
@@ -358,11 +264,6 @@ export const ComponentConfigPanel: React.FC<Props> = (props) => {
               </>
             )}
           </Form.List>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          </Form.Item>
         </Form>
       </Modal>
     </div>
